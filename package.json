@@ -1,0 +1,27 @@
+{
+    "name": "altv-quickstart",
+    "version": "0.0.1",
+    "description": "A Quick Start Project for alt:V",
+    "main": "index.js",
+    "scripts": {
+        "update": "npm install && node ./install.js"
+    },
+    "author": "Stuyk",
+    "dependencies": {
+        "chalk": "^4.0.0",
+        "dotenv": "^8.2.0",
+        "download": "^7.1.0",
+        "mongodb": "^3.5.7",
+        "sjcl": "^1.0.8"
+    },
+    "type": "module",
+    "devDependencies": {
+        "prettier": "^1.18.2"
+    },
+    "prettier": {
+        "printWidth": 120,
+        "tabWidth": 4,
+        "singleQuote": true,
+        "bracketSpacing": true
+    }
+}
