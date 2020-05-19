@@ -20,7 +20,7 @@ async function login(player, username, password) {
 
     if (arrayOfAccounts.length <= 0 || arrayOfAccounts.length >= 2) {
         player.send(`Username or password is incorrect.`);
-        player.emit('registration:Error', 'Username or password is incorrect.');
+        player.emit('panel:Registration:Error', 'Username or password is incorrect.');
         return;
     }
 
@@ -29,7 +29,7 @@ async function login(player, username, password) {
 
     if (!hashMatches) {
         player.send(`Username or password is incorrect.`);
-        player.emit('registration:Error', 'Username or password is incorrect.');
+        player.emit('panel:Registration:Error', 'Username or password is incorrect.');
         return;
     }
 
@@ -41,7 +41,7 @@ async function login(player, username, password) {
 
     if (players.length >= 1) {
         player.send('Account is already logged in.');
-        player.emit('registration:Error', 'Account is already logged in.');
+        player.emit('panel:Registration:Error', 'Account is already logged in.');
         return;
     }
 
@@ -61,7 +61,7 @@ async function register(player, username, password) {
 
     if (arrayOfAccounts.length >= 1) {
         player.send(`Username already exists.`);
-        player.emit('registration:Error', 'Username already exists.');
+        player.emit('panel:Registration:Error', 'Username already exists.');
         return;
     }
 

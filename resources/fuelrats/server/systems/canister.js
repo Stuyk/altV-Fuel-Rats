@@ -1,59 +1,81 @@
 import * as alt from 'alt';
-import { distance } from '../utility/vector';
 import { generateHash } from '../utility/encryption';
+import { DEFAULT_CONFIG } from '../configuration/config';
+import { distance2d } from '../../shared/vector';
 
 export class Canister {
     constructor(pos) {
-        this.pos = pos;
-        this.player = null;
-        this.hash = generateHash(`${Math.random() * 50}`);
-        this.resetCanister(pos);
+        this.data = {
+            pos,
+            player: null,
+            hash: generateHash(`${Math.random() * 50}`)
+        };
+
+        alt.on('sync:Player', this.updatePlayer.bind(this));
+        alt.setInterval(this.tick.bind(this), 10);
+        this.reset(this.data.pos);
     }
 
-    resetCanister(position) {
-        this.pos = position;
+    reset(position) {
+        this.data.pos = position;
+        this.data.player = null;
+        this.updatePlayer(null);
+        this.notifyPlayer(null, `A canister has been reset.`);
+    }
 
-        if (!this.interval) {
-            this.interval = alt.setInterval(this.syncCanister.bind(this), 25);
+    pickup(player) {
+        if (player.canister) {
+            this.notifyPlayer(player, `{FF0000} You have already picked up a canister.`);
+            return;
         }
 
-        alt.emit('chat:SendAll', `A canister has been reset.`);
-    }
-
-    pickupCanister(player) {
-        if (player.canister) {
+        if (this.data.player) {
             return;
         }
 
         player.canister = this;
-        this.player = player;
-        alt.emit('chat:SendAll', `${player.name} has picked up a canister.`);
+        this.data.player = player;
+
+        this.updatePlayer(null);
+        this.notifyPlayer(null, `${player.name} has picked up a canister.`);
     }
 
-    dropCanister() {
-        if (this.player && this.player.valid) {
-            this.player.canister = null;
+    drop(position) {
+        if (this.data.player && this.data.player.valid) {
+            position = this.data.player.pos;
+            this.data.player.canister = null;
         }
 
-        this.player = null;
-        alt.emit('chat:SendAll', `A canister has been dropped.`);
+        this.data.pos = position;
+        this.data.player = null;
+        this.updatePlayer(null);
+        this.notifyPlayer(null, `A canister has been dropped.`);
     }
 
-    syncCanister() {
-        if (alt.Player.all.length <= 0) {
+    updatePlayer(player) {
+        alt.emitClient(player, 'canister:Update', this.data);
+    }
+
+    notifyPlayer(player, message) {
+        if (!player) {
+            alt.emit('chat:SendAll', `[GAME] ${message}`);
             return;
         }
 
-        if (this.player && this.player.valid) {
-            this.pos = this.player.pos;
+        player.send(`[GAME] ${message}`);
+    }
+
+    tick() {
+        if (this.data.player) {
+            return;
         }
 
-        if (this.player && !this.player.valid) {
-            this.dropCanister();
+        if (!this.data.pos) {
+            return;
         }
 
-        const players = [...alt.Player.all].filter(player => {
-            if (player.data) {
+        const players = alt.Player.all.filter(player => {
+            if (player && player.valid && player.data) {
                 return player;
             }
         });
@@ -64,18 +86,12 @@ export class Canister {
 
         for (let i = 0; i < players.length; i++) {
             const player = players[i];
-            if (!player || !player.valid || !player.vehicle) {
-                continue;
+            const dist = distance2d(player.pos, this.data.pos);
+            if (dist <= 3) {
+                this.pickup(player);
             }
-
-            if (!this.player) {
-                const dist = distance(this.pos, player.vehicle.pos);
-                if (dist <= 2) {
-                    this.pickupCanister(player);
-                }
-            }
-
-            player.emit('canister:Sync', this);
         }
     }
 }
+
+new Canister(DEFAULT_CONFIG.SCRUM_SPAWNS[0]);

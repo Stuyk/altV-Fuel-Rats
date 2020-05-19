@@ -9,10 +9,26 @@ alt.Player.prototype.emit = function emit(emitRoute, ...args) {
 };
 
 alt.Player.prototype.sync = function sync(accountData) {
+    // Remove sensitive data...
+    delete accountData.password;
+
+    // Bind data...
     this.data = accountData;
 
+    // Setup interval to tick through...
+    this.tickInterval = alt.setInterval(this.tick.bind(this), 100);
+
     // What to do after synchronization.
+    this.emit('panel:Registration:Close');
     alt.emit('sync:Player', this);
+};
+
+alt.Player.prototype.tick = function tick() {
+    if (!this.valid) {
+        return;
+    }
+
+    this.setSyncedMeta('pos', this.pos);
 };
 
 alt.Player.prototype.setIntoVehicle = function setIntoVehicle(vehicle) {

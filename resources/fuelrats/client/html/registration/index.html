@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet/less" type="text/css" href="./style.less" />
+    </head>
+    <body>
+        <div id="app">
+            <template v-if="!registering">
+                <div class="container">
+                    <div class="header">Login / Registration</div>
+                    <template v-if="error">
+                        <p class="error">{{ error }}</p>
+                    </template>
+                    <div class="inputs">
+                        <input v-model="username" type="text" placeholder="username" ref="username" />
+                        <input v-model="password" type="password" placeholder="password" ref="password" />
+                    </div>
+                    <p class="disclaimer">
+                        All information is securely stored in a centralized database and hashed. No information is
+                        distributed, sold, or publicly traded. No email is required because we wish for you to remain
+                        anonymous.
+                    </p>
+                    <div class="buttons">
+                        <button v-on:click="processRegistration(false)">Login</button>
+                        <button v-on:click="processRegistration(true)">Register</button>
+                    </div>
+                </div>
+            </template>
+            <template v-if="registering">
+                <div class="container">
+                    <div class="loader">Processing...</div>
+                </div>
+            </template>
+        </div>
+        <script src="../vue.min.js"></script>
+        <script src="../less.min.js"></script>
+        <script src="./app.js" type="text/javascript"></script>
+    </body>
+</html>

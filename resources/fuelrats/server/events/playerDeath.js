@@ -1,6 +1,5 @@
 import * as alt from 'alt';
 import chalk from 'chalk';
-import { randomPositionAround } from '../utility/vector';
 import { DEFAULT_CONFIG } from '../configuration/config';
 import { WEAPON_BY_HASH } from '../gamedata/weapons';
 

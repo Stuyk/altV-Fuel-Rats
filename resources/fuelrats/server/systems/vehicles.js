@@ -9,6 +9,7 @@ function selectVehicle(player, model) {
         return;
     }
 
+    player.emit('chat:Init');
     player.send(`You have selected the vehicle: ${model}`);
     player.dimension = 0;
 

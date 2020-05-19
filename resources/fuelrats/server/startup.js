@@ -24,8 +24,7 @@ const filesToLoad = [
     './systems/scrum',
     './systems/spawn',
     './systems/vehicles',
-    './utility/array',
-    './utility/vector'
+    './utility/array'
 ];
 
 async function databaseReady() {

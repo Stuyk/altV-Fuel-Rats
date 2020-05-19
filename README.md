@@ -1,7 +1,7 @@
-Fuel Rats Gamemode
-Just a game mode I may consider making. (Stuyk)
+## Fuel Rats Gamemode
 
-Premise
+### Premise
+
 Various vehicles compete across the map to reach a fuel canister. Once a vehicle has a fuel canister they are considered the scrum holder. A scrum holder must deliver their canister to a predetermined gas station. No more than four canisters may exist at one time.
 
 Scrum holders can be robbed by simply bumping your front bumper into the driver side door of the scrum holder. If you are successful you will steal the canister from the scrum holder and become the scrum holder.
@@ -19,19 +19,21 @@ Credits can be spent on randomizing vehicle upgrades in 5 slots. Each slot will 
 
 A perfect vehicle will consist of [10, 10, 10, 10, 10]. Resulting in a 50 unit speed increase. These speeds cannot be re-rolled. All vehicle appearances can be purchased for credits but are lost if their vehicle is disabled.
 
-Core
+### Core
+
 This is what would be required to get the base gamemode out and playable.
 
-Account System
-Credit / Monetary System
-Vehicle Selection System
-Fuel Canister Spawning / Respawning
-Fuel Canister Scoring
-Fuel Canister Bumping
-Fuel Consumption
-Fuel Refills at Gas Stations
+-   Account System
+-   Credit / Monetary System
+-   Vehicle Selection System
+-   Fuel Canister Spawning / Respawning
+-   Fuel Canister Scoring
+-   Fuel Canister Bumping
+-   Fuel Consumption
+-   Fuel Refills at Gas Stations
 
-Optional
-Vehicle Upgrades
-Vehicle Customization
-Vehicle Picker (Can be random for core)
+### Optional
+
+-   Vehicle Upgrades
+-   Vehicle Customization
+-   Vehicle Picker (Can be random for core)

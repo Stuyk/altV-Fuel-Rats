@@ -16,7 +16,11 @@ function playerDisconnect(player) {
     }
 
     if (player.canister) {
-        player.canister.dropCanister();
+        player.canister.drop(player.pos);
+    }
+
+    if (player.tickInterval) {
+        alt.clearInterval(player.tickInterval);
     }
 
     alt.log(`${player.name} has disconnected from the server.`);

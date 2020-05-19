@@ -3,6 +3,7 @@ import * as native from 'natives';
 
 // Panels
 import '/client/panels/chat';
+import '/client/panels/registration';
 
 // Systems
 import '/client/systems/canister';

@@ -1,5 +1,6 @@
 import * as alt from 'alt';
 import * as native from 'natives';
+import { drawText2d } from '../utility/textdraws';
 
 let vehicles;
 let interval;
@@ -25,13 +26,13 @@ async function toggleVehiclePicker(validVehicles) {
             native.requestModel(hash);
 
             await new Promise(resolve => {
-                const interval = alt.setInterval(() => {
+                const modelInterval = alt.setInterval(() => {
                     if (!native.hasModelLoaded(hash)) {
                         return;
                     }
 
                     alt.log(`Loaded: ${vehicles[i]}`);
-                    alt.clearInterval(interval);
+                    alt.clearInterval(modelInterval);
                     resolve();
                 }, 100);
             });
@@ -48,6 +49,7 @@ async function toggleVehiclePicker(validVehicles) {
     startPosition = { ...alt.Player.local.pos };
 
     alt.on('keyup', keyHandler);
+    interval = alt.setInterval(tick, 0);
     synchronizeVehicle();
 }
 
@@ -85,6 +87,11 @@ function selectVehicle() {
         vehicle = null;
     }
 
+    if (interval) {
+        alt.clearInterval(interval);
+        interval = null;
+    }
+
     alt.emitServer('vehicle:Select', vehicles[0]);
     native.doScreenFadeIn(500);
 }
@@ -105,4 +112,11 @@ function synchronizeVehicle() {
     alt.setTimeout(() => {
         native.setPedIntoVehicle(alt.Player.local.scriptID, vehicle, -1);
     }, 50);
+}
+
+function tick() {
+    native.hideHudAndRadarThisFrame();
+
+    const lines = `'A' - Previous Vehicle | 'D' - Next Vehicle~n~'ENTER' - Select Vehicle`;
+    drawText2d(lines, { x: 0.5, y: 0.85 }, 0.5, 255, 255, 255, 255);
 }
