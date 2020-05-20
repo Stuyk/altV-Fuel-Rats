@@ -10,11 +10,14 @@ import {
 } from '../../shared/vector';
 
 alt.onServer('login', toggleTick);
+alt.onServer('player:RemoveBlip', removeBlip);
 
+const playerBlips = [];
 const disabledControls = [37, 24, 25, 65, 66, 67, 68, 69, 70, 75, 91, 92, 58];
 let nextHideAllPlayers = Date.now() + 25;
 let nextProfileCheck = Date.now() + 2500;
 let nextRaycast = Date.now() + 100;
+let nextPlayerBlipCheck = Date.now() + 2000;
 let endVector;
 let fwdVector;
 let lastRay;
@@ -40,8 +43,8 @@ function tick() {
     collisionCheck();
 
     if (endVector) {
-        const pos = { ...alt.Player.local.vehicle.pos };
-        native.drawLine(pos.x, pos.y, pos.z, endVector.x, endVector.y, endVector.z, 255, 0, 0, 255);
+        //const pos = { ...alt.Player.local.vehicle.pos };
+        //native.drawLine(pos.x, pos.y, pos.z, endVector.x, endVector.y, endVector.z, 255, 0, 0, 255);
     }
 }
 
@@ -84,9 +87,9 @@ function modifySpeed() {
     const hasCanister = alt.Player.local.getSyncedMeta('hasCanister');
 
     if (hasCanister) {
-        native.setEntityMaxSpeed(alt.Player.local.vehicle.scriptID, 65);
+        native.setEntityMaxSpeed(alt.Player.local.vehicle.scriptID, 40);
     } else {
-        native.setEntityMaxSpeed(alt.Player.local.vehicle.scriptID, 55);
+        native.setEntityMaxSpeed(alt.Player.local.vehicle.scriptID, 45);
     }
 }
 
@@ -100,11 +103,29 @@ function drawNames() {
             return;
         }
 
-        if (!player.getSyncedMeta('pos')) {
+        const currentVehPos = player.getSyncedMeta('pos');
+        if (!currentVehPos) {
             return;
         }
 
+        if (!player.blip) {
+            player.blip = new alt.PointBlip(currentVehPos.x, currentVehPos.y, currentVehPos.z);
+            player.blip.sprite = 225;
+            player.blip.color = 5;
+            player.blip.shortRange = false;
+            player.blip.owner = player;
+            player.blip.scale = 0.5;
+        }
+
         const dist = distance2d(player.pos, alt.Player.local.pos);
+        if (dist <= 199 && player.blip && player.vehicle) {
+            player.blip.pos = player.vehicle.pos;
+        }
+
+        if (dist >= 200 && player.blip && currentVehPos) {
+            player.blip.pos = currentVehPos;
+        }
+
         if (dist >= 35) {
             return;
         }
@@ -115,7 +136,7 @@ function drawNames() {
         }
 
         const pos = { ...player.vehicle.pos };
-        pos.z += 1;
+        pos.z += 2;
 
         let name = player.getSyncedMeta('name');
         if (!name) {
@@ -123,17 +144,19 @@ function drawNames() {
         }
 
         const hasCanister = player.getSyncedMeta('hasCanister');
-        const rgb = !hasCanister ? { r: 255, g: 255, b: 255 } : { r: 255, g: 255, b: 0 };
+        const rgb = !hasCanister ? { r: 255, g: 255, b: 255 } : { r: 190, g: 110, b: 255 };
         drawText3d(`(${player.id}) ${name}`, pos, fontSize, rgb.r, rgb.g, rgb.b, 150);
     });
 }
 
 function collisionCheck() {
+    /*
     if (Date.now() < nextRaycast) {
         return;
     }
 
     nextRaycast = Date.now() + 10;
+    */
 
     if (!alt.Player.local.vehicle.dimensions) {
         return;
@@ -148,13 +171,20 @@ function collisionCheck() {
         z: alt.Player.local.vehicle.pos.z
     };
 
-    lastRay = native.startShapeTestRay(
-        alt.Player.local.vehicle.pos.x,
-        alt.Player.local.vehicle.pos.y,
-        alt.Player.local.vehicle.pos.z,
+    const startVec = {
+        x: alt.Player.local.vehicle.pos.x - fwdVector.x * (dimensions.totalLength / 2 + 0.45),
+        y: alt.Player.local.vehicle.pos.y - fwdVector.y * (dimensions.totalLength / 2 + 0.45),
+        z: alt.Player.local.vehicle.pos.z
+    };
+
+    lastRay = native.startShapeTestCapsule(
+        startVec.x,
+        startVec.y,
+        startVec.z,
         endVec.x,
         endVec.y,
         endVec.z,
+        1,
         2,
         alt.Player.local.vehicle.scriptID,
         0
@@ -182,4 +212,14 @@ function collisionCheck() {
     }
 
     alt.emitServer('vehicle:Collide', closestVehicle);
+}
+
+function removeBlip(player) {
+    if (!player.blip) {
+        return;
+    }
+
+    if (player.blip && player.blip.valid) {
+        player.blip.destroy();
+    }
 }

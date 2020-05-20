@@ -6,6 +6,7 @@ import '/client/panels/chat';
 import '/client/panels/registration';
 
 // Systems
+import '/client/systems/ambiance';
 import '/client/systems/canister';
 import '/client/systems/tick';
 import '/client/systems/vehicle';

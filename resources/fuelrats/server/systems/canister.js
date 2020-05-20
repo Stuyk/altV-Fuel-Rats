@@ -15,10 +15,16 @@ export class Canister {
         this.pickupCooldown = Date.now() + 2500;
         alt.on('sync:Player', this.updatePlayer.bind(this));
         alt.setInterval(this.tick.bind(this), 10);
-        this.reset(this.data.pos);
+        this.reset(this.data.pos, true);
     }
 
     reset(position, reset = false) {
+        if (this.resetting) {
+            return;
+        }
+
+        this.resetting = true;
+
         if (this.data.player && this.data.player.valid) {
             position = this.data.player.pos;
             this.data.player.canister = null;
@@ -28,13 +34,25 @@ export class Canister {
             position = DEFAULT_CONFIG.SCRUM_SPAWNS[Math.floor(Math.random() * DEFAULT_CONFIG.SCRUM_SPAWNS.length)];
         }
 
-        this.data.goal = DEFAULT_CONFIG.SCRUM_GOALS[Math.floor(Math.random() * DEFAULT_CONFIG.SCRUM_GOALS.length)];
-        this.data.player = null;
-        this.data.pos = position;
+        alt.Player.all.forEach(player => {
+            player.setSyncedMeta('hasCanister', false);
+        });
 
+        this.data.player = null;
+        this.data.pos = null;
+        this.data.goal = null;
         this.updatePlayer(null);
-        this.notifyPlayer(null, `A canister has been reset.`);
-        this.resetting = false;
+        this.notifyPlayer(null, `Next canister will spawn in 30 seconds!`);
+
+        alt.setTimeout(() => {
+            this.data.goal = DEFAULT_CONFIG.SCRUM_GOALS[Math.floor(Math.random() * DEFAULT_CONFIG.SCRUM_GOALS.length)];
+            this.data.player = null;
+            this.data.pos = position;
+            this.resetting = false;
+            this.updatePlayer(null);
+            this.notifyPlayer(null, `The canister has been spawned.`);
+            this.playSound(null, 'HUD_AWARDS', 'CHALLENGE_UNLOCKED');
+        }, 30000);
     }
 
     pickup(player) {
@@ -42,14 +60,17 @@ export class Canister {
             return;
         }
 
-        this.pickupCooldown = Date.now() + 2000;
+        this.pickupCooldown = Date.now() + 1000;
 
         if (player.canister) {
             this.notifyPlayer(player, `{FF0000} You have already picked up a canister.`);
             return;
         }
 
+        this.playSound(player, 'DLC_HEIST_HACKING_SNAKE_SOUNDS', 'Beep_Green');
+
         if (this.data.player) {
+            this.playSound(this.data.player, 'DLC_HEIST_HACKING_SNAKE_SOUNDS', 'Beep_Red');
             this.notifyPlayer(
                 null,
                 `${player.data.username} has stolen a canister from ${this.data.player.data.username}!`
@@ -85,11 +106,20 @@ export class Canister {
 
     notifyPlayer(player, message) {
         if (!player) {
-            alt.emit('chat:SendAll', `[GAME] ${message}`);
+            alt.emit('chat:SendAll', `{BE6EFF}[INFO]{FFFFFF} ${message}`);
             return;
         }
 
-        player.send(`[GAME] ${message}`);
+        player.send(`{BE6EFF}[INFO]{FFFFFF} ${message}`);
+    }
+
+    playSound(player, dictionary, name) {
+        if (!player) {
+            alt.emitClient(null, 'sound:Play', dictionary, name);
+            return;
+        }
+
+        player.emit('sound:Play', dictionary, name);
     }
 
     tick() {
@@ -98,18 +128,16 @@ export class Canister {
         }
 
         if (this.data.player && this.data.player.valid) {
-            if (distance2d(this.data.player.pos, this.data.goal) <= 5) {
-                this.resetting = true;
+            if (distance2d(this.data.player.pos, this.data.goal) <= 5 && !this.resetting) {
                 if (!this.data.player.score) {
                     this.data.player.score = 1;
                 } else {
                     this.data.player.score += 1;
                 }
 
-                this.notifyPlayer(
-                    null,
-                    `${this.data.player.data.username} has scored! Total score: ${this.data.player.score}`
-                );
+                const message = `${this.data.player.data.username} has scored! Total score: ${this.data.player.score}`;
+                this.notifyPlayer(null, message);
+                this.playSound(null, 'HUD_MINI_GAME_SOUNDSET', 'CHECKPOINT_PERFECT');
                 this.reset(null, true);
             }
 

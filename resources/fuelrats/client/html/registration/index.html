@@ -9,28 +9,35 @@
         <div id="app">
             <template v-if="!registering">
                 <div class="container">
-                    <div class="header">Login / Registration</div>
+                    <div class="header">Welcome!</div>
                     <template v-if="error">
                         <p class="error">{{ error }}</p>
                     </template>
+                    <p class="disclaimer">
+                        <color>Fuel Rats</color> is a vehicle gamemode where you pursue players who obtain canisters.
+                        Canisters are also known as jerry cans. Canisters must be taken to their designated goal to be
+                        scored. Canisters can be stolen from other players by ramming players with a canister. Canisters
+                        are always displayed above vehicles.
+                    </p>
+                    <p class="disclaimer">
+                        Source code is available on
+                        <span class="link" v-on:click="window.open('https://github.com/Stuyk/altV-Fuel-Rats')"
+                            >GitHub and created by Stuyk.</span
+                        >
+                    </p>
                     <div class="inputs">
                         <input v-model="username" type="text" placeholder="username" ref="username" />
                         <input v-model="password" type="password" placeholder="password" ref="password" />
                     </div>
-                    <p class="disclaimer">
-                        All information is securely stored in a centralized database and hashed. No information is
-                        distributed, sold, or publicly traded. No email is required because we wish for you to remain
-                        anonymous.
-                    </p>
                     <div class="buttons">
-                        <button v-on:click="processRegistration(false)">Login</button>
-                        <button v-on:click="processRegistration(true)">Register</button>
+                        <button class="space-right" v-on:click="processRegistration(false)">Login</button>
+                        <button class="space-left" v-on:click="processRegistration(true)">Register</button>
                     </div>
                 </div>
             </template>
             <template v-if="registering">
                 <div class="container">
-                    <div class="loader">Processing...</div>
+                    <div class="loader"></div>
                 </div>
             </template>
         </div>

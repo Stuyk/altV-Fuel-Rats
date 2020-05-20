@@ -20,21 +20,41 @@ function selectVehicle(player, model) {
         player.lastVehicle = null;
     }
 
-    // TODO: RANDOM SPAWN CODE FOR VEHICLES
+    trySpawningVehicle(player, model);
+}
 
+export function trySpawningVehicle(player, model) {
     try {
         const vehicle = new alt.Vehicle(model, player.pos.x, player.pos.y, player.pos.z, 0, 0, 0);
         player.setIntoVehicle(vehicle);
         player.lastVehicle = vehicle;
         player.vehicleModel = model;
         vehicle.player = player;
+        vehicle.customPrimaryColor = { r: 255, g: 255, b: 255, a: 255 };
+        vehicle.customSecondaryColor = { r: 255, g: 255, b: 255, a: 255 };
     } catch (err) {
-        console.log(`${player.name} tried spawning an invalid vehicle.`);
-        player.kick();
+        const vehicle = new alt.Vehicle(CONFIG.VALID_VEHICLES[0], player.pos.x, player.pos.y, player.pos.z, 0, 0, 0);
+        player.setIntoVehicle(vehicle);
+        player.lastVehicle = vehicle;
+        player.vehicleModel = model;
+        vehicle.player = player;
+        player.send(`Something went wrong so we defaulted your vehicle.`);
+        vehicle.customPrimaryColor = { r: 255, g: 255, b: 255, a: 255 };
+        vehicle.customSecondaryColor = { r: 255, g: 255, b: 255, a: 255 };
     }
 }
 
 function collideVehicle(player, vehicle) {
+    if (!vehicle) {
+        return;
+    }
+
+    if (vehicle.debug) {
+        player.send(`You collided!`);
+        player.send(`---`);
+        return;
+    }
+
     if (!vehicle.player) {
         return;
     }
@@ -79,24 +99,6 @@ function vehicleCheck(player) {
             player.lastVehicle = null;
         }
 
-        try {
-            const vehicle = new alt.Vehicle(model, player.pos.x, player.pos.y, player.pos.z, 0, 0, 0);
-            player.lastVehicle = vehicle;
-            vehicle.player = player;
-            player.setIntoVehicle(vehicle);
-        } catch (err) {
-            const vehicle = new alt.Vehicle(
-                DEFAULT_CONFIG.VALID_VEHICLES[0],
-                player.pos.x,
-                player.pos.y,
-                player.pos.z,
-                0,
-                0,
-                0
-            );
-            player.lastVehicle = vehicle;
-            vehicle.player = player;
-            player.setIntoVehicle(vehicle);
-        }
+        trySpawningVehicle(player, model);
     }
 }

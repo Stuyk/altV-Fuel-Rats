@@ -20,7 +20,6 @@ alt.Player.prototype.sync = function sync(accountData) {
     this.tickInterval = alt.setInterval(this.tick.bind(this), 100);
 
     // What to do after synchronization.
-    this.emit('panel:Registration:Close');
     alt.emit('sync:Player', this);
 };
 

@@ -7,22 +7,18 @@ export const DEFAULT_CONFIG = {
     SPAWN_RANGE: 10,
     RANDOM_PLAYER_MODELS: ['mp_f_freemode_01', 'mp_m_freemode_01'],
     VALID_VEHICLES: [
-        'bifta',
-        'bodhi2',
+        'bfinjection',
         'brawler',
-        'brutus',
-        'dubsta3',
+        'caracara2',
+        'contender',
         'everon',
         'freecrawler',
         'hellion',
-        'kamacho',
-        'mesa3',
-        'outlaw',
-        'rebel',
+        'huntley',
+        'rebel2',
         'riata',
-        'sandking',
-        'trophytruck',
-        'vagrant'
+        'sandking2',
+        'xls2'
     ],
     SCRUM_SPAWNS: [
         {

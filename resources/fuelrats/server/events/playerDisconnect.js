@@ -6,6 +6,7 @@ alt.on('playerDisconnect', playerDisconnect);
 
 function playerDisconnect(player) {
     player.disconnected = true;
+    alt.emitClient(null, 'player:RemoveBlip', player);
 
     if (!player || !player.valid) {
         return;

@@ -39,6 +39,7 @@ async function toggleVehiclePicker(validVehicles) {
         }
     }
 
+    alt.emit('panel:Registration:Close');
     native.doScreenFadeIn(200);
 
     if (interval) {

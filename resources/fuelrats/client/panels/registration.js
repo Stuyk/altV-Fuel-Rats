@@ -7,6 +7,7 @@ let view;
 alt.onServer('panel:Registration', initializeRegistration);
 alt.onServer('panel:Registration:Close', closeRegistration);
 alt.onServer('panel:Registration:Error', handleError);
+alt.on('panel:Registration:Close', closeRegistration);
 
 function initializeRegistration() {
     if (!view) {
@@ -39,7 +40,10 @@ function handleError(message) {
 }
 
 function closeRegistration() {
-    view.destroy();
+    if (view) {
+        view.destroy();
+    }
+
     view = null;
     alt.Player.local.viewActive = false;
     alt.toggleGameControls(true);

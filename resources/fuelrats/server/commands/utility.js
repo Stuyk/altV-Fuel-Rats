@@ -1,5 +1,7 @@
 import * as alt from 'alt';
 import { registerCmd } from '../systems/chat';
+import { trySpawningVehicle } from '../systems/vehicles';
+import { spawnPlayer } from '../systems/spawn';
 
 registerCmd('coords', '/coords | Returns current coordinates to chat and console.', player => {
     const coords = player.pos;
@@ -22,23 +24,25 @@ function flipVehicle(player) {
         player.lastVehicle = null;
     }
 
-    try {
-        const vehicle = new alt.Vehicle(model, player.pos.x, player.pos.y, player.pos.z, 0, 0, 0);
-        player.lastVehicle = vehicle;
-        vehicle.player = player;
-        player.setIntoVehicle(vehicle);
-    } catch (err) {
-        const vehicle = new alt.Vehicle(
-            DEFAULT_CONFIG.VALID_VEHICLES[0],
-            player.pos.x,
-            player.pos.y,
-            player.pos.z,
-            0,
-            0,
-            0
-        );
-        player.lastVehicle = vehicle;
-        vehicle.player = player;
-        player.setIntoVehicle(vehicle);
+    trySpawningVehicle(player, model);
+}
+
+registerCmd('car', '/car | Swap Vehicle', swapCar);
+registerCmd('swapcar', '/swapcar | Swap Vehicle', swapCar);
+registerCmd('spawncar', '/spawncar | Swap Vehicle', swapCar);
+registerCmd('changevehicle', '/changevehicle | Swap Vehicle', swapCar);
+registerCmd('vehicle', '/vehicle | Swap Vehicle', swapCar);
+
+function swapCar(player) {
+    if (player.canister) {
+        player.send(`{BE6EFF}[INFO]{FFFFFF} You cannot do that while you have a canister.`);
+        return;
     }
+
+    if (player.lastVehicle && player.lastVehicle.valid) {
+        player.lastVehicle.destroy();
+        player.lastVehicle = null;
+    }
+
+    spawnPlayer(player);
 }

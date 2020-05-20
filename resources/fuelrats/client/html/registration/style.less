@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Condensed|Roboto+Mono|Oleo+Script&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Condensed|Oxygen|Roboto+Mono|Oleo+Script&display=swap');
 
 @dark: rgba(25, 25, 25, 1);
 @lighten: rgba(255, 255, 255, 0.1);
 @lighten2: rgba(255, 255, 255, 0.2);
-@contrast1: rgb(0, 217, 255);
-@contrast2: rgb(255, 153, 0);
+@contrast1: rgb(190, 110, 255);
+@contrast2: rgb(255, 103, 247);
 @darkaccent: rgb(8, 8, 8);
 @success: rgb(131, 255, 162);
 @error: rgb(255, 123, 123);
@@ -13,6 +13,7 @@
 @RobotoCondensed: 'Roboto Condensed';
 @RobotoMono: 'Roboto Mono';
 @OleoScript: 'Oleo Script';
+@Oxygen: 'Oxygen';
 @FilterOrange: invert(0.5) sepia(1) saturate(5) hue-rotate(330deg);
 @FilterBlue: invert(0.5) sepia(1) saturate(5) hue-rotate(250deg);
 
@@ -45,23 +46,33 @@ body {
     flex-direction: column;
     justify-content: center;
     background: rgba(35, 35, 35, 1);
-    width: 400px;
-    padding: 10px;
+    width: 800px;
+    min-height: 460px;
+    padding: 50px;
     box-sizing: border-box;
     box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 1);
 
     .header {
-        padding-left: 5px;
+        color: @contrast1;
         font-family: @RobotoCondensed;
+        font-size: 32px;
+        font-weight: 600;
+        width: 100%;
+        padding-bottom: 5px;
+        border-bottom: 2px solid @contrast1;
     }
 
     .disclaimer {
         padding-left: 5px;
         padding-right: 5px;
         font-family: @RobotoCondensed;
-        font-size: 11px;
-        text-transform: uppercase;
+        font-size: 16px;
+        // text-transform: uppercase;
         text-align: justify;
+    }
+
+    color {
+        color: @contrast1;
     }
 
     .error {
@@ -71,17 +82,27 @@ body {
         align-items: center;
         justify-items: center;
         color: white;
-        font-family: @Roboto;
+        font-family: @Oxygen;
         padding-left: 5px;
         padding-right: 5px;
         margin-bottom: 5px;
         margin-top: 15px;
         width: 100%;
         font-size: 16px;
-        background: @contrast2;
+        background: @contrast1;
         box-sizing: border-box;
         border-radius: 5px;
         min-height: 35px;
+        box-shadow: 0px 0px 5px 0px black;
+    }
+
+    .link {
+        color: @contrast1;
+
+        &:hover {
+            color: @contrast2;
+            cursor: pointer;
+        }
     }
 
     .inputs {
@@ -93,34 +114,56 @@ body {
             padding-right: 10px;
             min-height: 35px;
             margin-top: 10px;
+            margin-bottom: 10px;
             background: rgba(10, 10, 10, 1);
-            color: white;
-            border: 0px;
+            color: @contrast1;
+            border: 2px solid transparent;
             border-radius: 5px;
             font-family: @Roboto;
+            font-size: 16px;
+
+            &:active {
+                border-color: @contrast1;
+            }
+
+            &:focus {
+                border-color: @contrast1;
+            }
         }
     }
 
     .buttons {
         display: flex;
+        margin-top: 10px;
 
         button {
             width: 100%;
             min-height: 35px;
             text-transform: uppercase;
-            font-family: @RobotoMono;
+            font-family: @Oxygen;
             border: 0px;
-            margin-left: 2px;
-            margin-right: 2px;
             border-radius: 5px;
             color: @contrast1;
             background: rgba(10, 10, 10, 1);
+            border: 2px solid @contrast1;
+            font-size: 14px;
+            letter-spacing: 0.25em;
+            font-weight: 600;
 
             &:hover {
-                color: @contrast2;
-                background: rgba(75, 75, 75, 1);
+                color: white;
+                background: @contrast1;
+                border-color: @contrast1;
                 cursor: pointer;
             }
+        }
+
+        .space-right {
+            margin-right: 5px;
+        }
+
+        .space-left {
+            margin-left: 5px;
         }
     }
 }
@@ -128,7 +171,7 @@ body {
 .loader,
 .loader:before,
 .loader:after {
-    background: #ffffff;
+    background: @contrast1;
     -webkit-animation: load1 1s infinite ease-in-out;
     animation: load1 1s infinite ease-in-out;
     width: 1em;
@@ -136,7 +179,7 @@ body {
 }
 
 .loader {
-    color: #ffffff;
+    color: @contrast1;
     text-indent: -9999em;
     margin: 88px auto;
     position: relative;

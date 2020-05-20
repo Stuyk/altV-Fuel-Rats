@@ -9,6 +9,16 @@ alt.onServer('canister:Update', canisterUpdate);
 const emptyVector = { x: 0, y: 0, z: 0 };
 const canisters = [];
 const jerryCanHash = native.getHashKey('prop_jerrycan_01a');
+const spawn = {
+    x: 1207.3187255859375,
+    y: 3078.633056640625,
+    z: 40.6871337890625
+};
+const spawnBlip = new alt.PointBlip(spawn.x, spawn.y, spawn.z);
+spawnBlip.sprite = 40;
+spawnBlip.color = 83;
+spawnBlip.shortRange = false;
+spawnBlip.name = 'Spawn';
 
 native.requestModel(jerryCanHash);
 
@@ -24,16 +34,39 @@ function canisterUpdate(canisterData) {
     canisters[i].pos = canisterData.pos;
     canisters[i].goal = canisterData.goal;
 
-    if (!canisters[i].blip) {
+    if (!canisters[i].blip && canisters[i].pos) {
         canisters[i].blip = new alt.PointBlip(canisters[i].pos.x, canisters[i].pos.y, canisters[i].pos.z);
         canisters[i].blip.sprite = 361;
         canisters[i].blip.shortRange = false;
+        canisters[i].blip.color = 1;
+        canisters[i].blip.name = 'Canister';
+        canisters[i].blip.priority = 99;
     }
 
-    if (!canisters[i].goalBlip) {
+    if (!canisters[i].goalBlip && canisters[i].goal) {
         canisters[i].goalBlip = new alt.PointBlip(canisters[i].pos.x, canisters[i].pos.y, canisters[i].pos.z);
         canisters[i].goalBlip.sprite = 38;
         canisters[i].goalBlip.shortRange = false;
+        canisters[i].blip.name = 'Goal';
+    }
+
+    if (!canisters[i].pos && canisters[i].blip) {
+        canisters[i].blip.destroy();
+        canisters[i].blip = null;
+    }
+
+    if (!canisters[i].goal && canisters[i].goalBlip) {
+        canisters[i].goalBlip.destroy();
+        canisters[i].goalBlip = null;
+    }
+
+    if (canisters[i].object && !canisters[i].pos) {
+        native.deleteObject(canisters[i].object);
+        canisters[i].object = null;
+    }
+
+    if (!canisters[i].pos) {
+        return;
     }
 
     canisters[i].blip.pos = canisterData.pos;
@@ -99,6 +132,14 @@ alt.everyTick(() => {
         const canister = canisters[i];
 
         if (!canister) {
+            continue;
+        }
+
+        if (!canister.pos) {
+            continue;
+        }
+
+        if (!canister.goal) {
             continue;
         }
 
