@@ -21,13 +21,15 @@ export default class ConnectionInfo {
         }
 
         if (process.env['ENVIRONMENT'] !== 'dev') {
+            console.log(`Running Producting Database`);
+
             /** @type {mongodb.MongoClient} */
             this.client = new MongoClient('mongodb://localhost:27017', {
                 useUnifiedTopology: true,
                 useNewUrlParser: true,
                 auth: {
-                    user: process.env.DB_USER,
-                    password: process.env.DB_PASS
+                    user: process.env['DB_USER'],
+                    password: process.env['DB_PASS']
                 }
             });
         } else {
@@ -38,22 +40,35 @@ export default class ConnectionInfo {
             });
         }
 
-        this.client.connect(async err => {
-            if (err) {
-                console.log(err);
-                return;
-            }
+        this.initConnection();
+    }
 
-            /** @type {mongodb.Db} Main connection */
-            this.db = this.client.db('fuelrats');
-            this.generateCollections();
-            alt.emit('database:Ready');
-            instance = this;
+    async initConnection() {
+        await new Promise(resolve => {
+            const interval = alt.setInterval(async () => {
+                const result = await this.client.connect().catch(err => {
+                    if (err) {
+                        return undefined;
+                    }
+                });
+
+                if (!result) {
+                    return;
+                }
+
+                resolve();
+                alt.clearInterval(interval);
+            }, 2000);
         });
+
+        this.db = this.client.db('fuelrats');
+        this.generateCollections();
+        instance = this;
     }
 
     async generateCollections() {
         await this.db.createCollection('accounts');
+        alt.emit('database:Ready');
     }
 
     /**
