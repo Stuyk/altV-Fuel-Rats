@@ -14,6 +14,7 @@ alt.Player.prototype.sync = function sync(accountData) {
 
     // Bind data...
     this.data = accountData;
+    this.setSyncedMeta('name', this.data.username);
 
     // Setup interval to tick through...
     this.tickInterval = alt.setInterval(this.tick.bind(this), 100);

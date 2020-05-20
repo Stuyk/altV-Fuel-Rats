@@ -33,12 +33,12 @@ export function drawText3d(msg, pos, scale, r, g, b, a) {
         msg = msg.replace(hex[0], '');
     }
 
-    if (scale <= 0.1) {
-        scale = 0.1;
+    if (scale <= 0.3) {
+        scale = 0.3;
     }
 
-    if (scale > 1.1) {
-        scale = 1.1;
+    if (scale > 2) {
+        scale = 2;
     }
 
     native.setDrawOrigin(pos.x, pos.y, pos.z, 0);

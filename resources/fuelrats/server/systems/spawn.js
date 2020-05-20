@@ -10,4 +10,8 @@ function spawnPlayer(player) {
     player.spawn(spawn.x, spawn.y, spawn.z, 0);
     player.dimension = Math.floor(Math.random() * 5000);
     player.emit('vehicle:Pick', DEFAULT_CONFIG.VALID_VEHICLES);
+    player.setWeather(5);
+
+    const currentDate = new Date(Date.now());
+    player.setDateTime(currentDate.getDay(), currentDate.getMonth(), currentDate.getFullYear(), 10, 0, 0);
 }

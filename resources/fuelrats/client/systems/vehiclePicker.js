@@ -102,15 +102,13 @@ function synchronizeVehicle() {
         vehicle = null;
     }
 
-    alt.log(vehicles[0]);
-
     const hash = native.getHashKey(vehicles[0]);
     vehicle = native.createVehicle(hash, startPosition.x, startPosition.y, startPosition.z, 0, false, false, false);
-
     native.freezeEntityPosition(vehicle, true);
 
     alt.setTimeout(() => {
         native.setPedIntoVehicle(alt.Player.local.scriptID, vehicle, -1);
+        native.setEntityAlpha(alt.Player.local.scriptID);
     }, 50);
 }
 

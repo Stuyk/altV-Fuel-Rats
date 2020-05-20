@@ -10,7 +10,7 @@ import * as alt from 'alt';
 export function getPlayersInRange(pos, range, dimension = 0) {
     if (pos === undefined || range === undefined) {
         throw new Error('GetPlayersInRange => pos or range is undefined');
-    };
+    }
 
     return alt.Player.all.filter(player => {
         return player.dimension === dimension && distance2d(pos, player.pos) <= range;
@@ -120,7 +120,7 @@ export function getClosestVectorFromGroup(pos, arrayOfPositions) {
  * @returns {Array<alt.Player>}
  */
 export function getClosestPlayer(player) {
-    return getClosestVector(player.pos, [...alt.Player.all]);
+    return getClosestVectorFromGroup(player.pos, [...alt.Player.all]);
 }
 
 /**
@@ -129,5 +129,5 @@ export function getClosestPlayer(player) {
  * @returns {Array<alt.Vehicle>}
  */
 export function getClosestVehicle(player) {
-    return getClosestVehicle(player.pos, [...alt.Vehicle.all]);
+    return getClosestVectorFromGroup(player.pos, [...alt.Vehicle.all]);
 }

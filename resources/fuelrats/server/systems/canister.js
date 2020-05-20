@@ -8,40 +8,67 @@ export class Canister {
         this.data = {
             pos,
             player: null,
-            hash: generateHash(`${Math.random() * 50}`)
+            hash: generateHash(`${Math.random() * 50}`),
+            goal: DEFAULT_CONFIG.SCRUM_GOALS[Math.floor(Math.random() * DEFAULT_CONFIG.SCRUM_GOALS.length)]
         };
 
+        this.pickupCooldown = Date.now() + 2500;
         alt.on('sync:Player', this.updatePlayer.bind(this));
         alt.setInterval(this.tick.bind(this), 10);
         this.reset(this.data.pos);
     }
 
-    reset(position) {
-        this.data.pos = position;
+    reset(position, reset = false) {
+        if (this.data.player && this.data.player.valid) {
+            position = this.data.player.pos;
+            this.data.player.canister = null;
+        }
+
+        if (reset) {
+            position = DEFAULT_CONFIG.SCRUM_SPAWNS[Math.floor(Math.random() * DEFAULT_CONFIG.SCRUM_SPAWNS.length)];
+        }
+
+        this.data.goal = DEFAULT_CONFIG.SCRUM_GOALS[Math.floor(Math.random() * DEFAULT_CONFIG.SCRUM_GOALS.length)];
         this.data.player = null;
+        this.data.pos = position;
+
         this.updatePlayer(null);
         this.notifyPlayer(null, `A canister has been reset.`);
+        this.resetting = false;
     }
 
     pickup(player) {
+        if (Date.now() < this.pickupCooldown) {
+            return;
+        }
+
+        this.pickupCooldown = Date.now() + 2000;
+
         if (player.canister) {
             this.notifyPlayer(player, `{FF0000} You have already picked up a canister.`);
             return;
         }
 
         if (this.data.player) {
-            return;
+            this.notifyPlayer(
+                null,
+                `${player.data.username} has stolen a canister from ${this.data.player.data.username}!`
+            );
+            this.data.player.canister = null;
+            this.data.player.setSyncedMeta('hasCanister', false);
+        } else {
+            this.notifyPlayer(null, `${player.data.username} has picked up a canister.`);
         }
 
         player.canister = this;
         this.data.player = player;
 
+        player.setSyncedMeta('hasCanister', true);
         this.updatePlayer(null);
-        this.notifyPlayer(null, `${player.name} has picked up a canister.`);
     }
 
     drop(position) {
-        if (this.data.player && this.data.player.valid) {
+        if (this.data.player && this.data.player.pos) {
             position = this.data.player.pos;
             this.data.player.canister = null;
         }
@@ -66,7 +93,26 @@ export class Canister {
     }
 
     tick() {
-        if (this.data.player) {
+        if (this.resetting) {
+            return;
+        }
+
+        if (this.data.player && this.data.player.valid) {
+            if (distance2d(this.data.player.pos, this.data.goal) <= 5) {
+                this.resetting = true;
+                if (!this.data.player.score) {
+                    this.data.player.score = 1;
+                } else {
+                    this.data.player.score += 1;
+                }
+
+                this.notifyPlayer(
+                    null,
+                    `${this.data.player.data.username} has scored! Total score: ${this.data.player.score}`
+                );
+                this.reset(null, true);
+            }
+
             return;
         }
 
@@ -75,7 +121,7 @@ export class Canister {
         }
 
         const players = alt.Player.all.filter(player => {
-            if (player && player.valid && player.data) {
+            if (player && player.valid && player.data && player.pos && player.dimension === 0 && player.vehicle) {
                 return player;
             }
         });
@@ -87,6 +133,7 @@ export class Canister {
         for (let i = 0; i < players.length; i++) {
             const player = players[i];
             const dist = distance2d(player.pos, this.data.pos);
+
             if (dist <= 3) {
                 this.pickup(player);
             }

@@ -61,7 +61,7 @@ function chatSend(player, msg) {
         return;
     }
 
-    alt.log(`[Message] ${player.name}: ${msg}`);
+    alt.log(`[Message] ${player.data.username}: ${msg}`);
 
     // Cleanse Message
     msg = msg
@@ -69,7 +69,7 @@ function chatSend(player, msg) {
         .replace(/'/g, '&#39')
         .replace(/"/g, '&#34');
 
-    alt.emitClient(null, 'chat:Send', `${player.name} says: ${msg}`);
+    alt.emitClient(null, 'chat:Send', `${player.data.username} says: ${msg}`);
 }
 
 function sendAll(message) {

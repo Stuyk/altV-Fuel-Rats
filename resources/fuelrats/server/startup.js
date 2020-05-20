@@ -9,7 +9,6 @@ new Database();
 alt.on('database:Ready', databaseReady);
 
 const filesToLoad = [
-    './commands/registration',
     './commands/utility',
     './configuration/config',
     './events/playerConnect',
@@ -18,10 +17,9 @@ const filesToLoad = [
     './events/playerEnterVehicle',
     './events/playerLeaveVehicle',
     './prototypes/player',
+    './systems/canister',
     './systems/chat',
-    './systems/account',
     './systems/registration',
-    './systems/scrum',
     './systems/spawn',
     './systems/vehicles',
     './utility/array'
