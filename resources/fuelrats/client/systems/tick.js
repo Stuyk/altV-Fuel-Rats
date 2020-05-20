@@ -99,10 +99,6 @@ function drawNames() {
             return;
         }
 
-        if (!player.vehicle) {
-            return;
-        }
-
         const currentVehPos = player.getSyncedMeta('pos');
         if (!currentVehPos) {
             return;
@@ -117,12 +113,10 @@ function drawNames() {
             player.blip.scale = 0.5;
         }
 
-        const dist = distance2d(player.pos, alt.Player.local.pos);
-        if (dist <= 199 && player.blip && player.vehicle) {
+        const dist = distance2d(currentVehPos, alt.Player.local.pos);
+        if (dist <= 100 && player.vehicle) {
             player.blip.pos = player.vehicle.pos;
-        }
-
-        if (dist >= 200 && player.blip && currentVehPos) {
+        } else {
             player.blip.pos = currentVehPos;
         }
 
@@ -135,12 +129,16 @@ function drawNames() {
             fontSize = 0.5;
         }
 
-        const pos = { ...player.vehicle.pos };
+        const pos = !player.vehicle ? { ...currentVehPos } : { ...player.vehicle.pos };
         pos.z += 2;
 
         let name = player.getSyncedMeta('name');
         if (!name) {
             name = 'Syncing...';
+        }
+
+        if (player.blip && name) {
+            player.blip.name = name;
         }
 
         const hasCanister = player.getSyncedMeta('hasCanister');

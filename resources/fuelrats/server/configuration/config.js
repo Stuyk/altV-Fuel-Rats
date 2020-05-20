@@ -7,7 +7,6 @@ export const DEFAULT_CONFIG = {
     SPAWN_RANGE: 10,
     RANDOM_PLAYER_MODELS: ['mp_f_freemode_01', 'mp_m_freemode_01'],
     VALID_VEHICLES: [
-        'bfinjection',
         'brawler',
         'caracara2',
         'contender',

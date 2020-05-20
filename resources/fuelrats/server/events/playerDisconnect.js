@@ -12,6 +12,10 @@ function playerDisconnect(player) {
         return;
     }
 
+    if (player.data) {
+        alt.emit('chat:SendAll', `{BE6EFF}[INFO]{FFFFFF} ${player.data.username} has left the game.`);
+    }
+
     if (player.vehicle && player.vehicle.valid) {
         player.vehicle.destroy();
     }

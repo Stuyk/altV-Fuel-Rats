@@ -20,6 +20,7 @@ alt.Player.prototype.sync = function sync(accountData) {
     this.tickInterval = alt.setInterval(this.tick.bind(this), 100);
 
     // What to do after synchronization.
+    alt.emit('chat:SendAll', `{BE6EFF}[INFO]{FFFFFF} ${this.data.username} has joined the game!`);
     alt.emit('sync:Player', this);
 };
 
