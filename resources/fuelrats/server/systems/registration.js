@@ -56,7 +56,6 @@ async function login(player, username, password) {
  * @param  {String} password
  */
 async function register(player, username, password) {
-    console.log(`${username} ${password}`);
     const arrayOfAccounts = await db.fetchAllByField('username', username, 'accounts');
 
     if (arrayOfAccounts.length >= 1) {
