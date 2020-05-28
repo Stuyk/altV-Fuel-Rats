@@ -42,6 +42,8 @@ export function trySpawningVehicle(player, model) {
         vehicle.customPrimaryColor = { r: 255, g: 255, b: 255, a: 255 };
         vehicle.customSecondaryColor = { r: 255, g: 255, b: 255, a: 255 };
     }
+
+    player.setSyncedMeta('ready', true);
 }
 
 function collideVehicle(player, vehicle) {

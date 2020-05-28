@@ -17,6 +17,7 @@ const filesToLoad = [
     './events/playerEnterVehicle',
     './events/playerLeaveVehicle',
     './prototypes/player',
+    './systems/anticheat',
     './systems/canister',
     './systems/chat',
     './systems/registration',

@@ -13,6 +13,7 @@ export function spawnPlayer(player) {
 
     const currentDate = new Date(Date.now());
     player.setDateTime(currentDate.getDay(), currentDate.getMonth(), currentDate.getFullYear(), 10, 0, 0);
+    player.setSyncedMeta('ready', false);
 
     alt.setTimeout(() => {
         if (!player || !player.valid) {

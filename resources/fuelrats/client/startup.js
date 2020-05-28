@@ -7,6 +7,7 @@ import '/client/panels/registration';
 
 // Systems
 import '/client/systems/ambiance';
+import '/client/systems/anticheat';
 import '/client/systems/canister';
 import '/client/systems/tick';
 import '/client/systems/vehicle';

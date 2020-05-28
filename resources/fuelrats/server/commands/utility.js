@@ -44,5 +44,10 @@ function swapCar(player) {
         player.lastVehicle = null;
     }
 
+    player.setSyncedMeta('ready', false);
     spawnPlayer(player);
 }
+
+registerCmd('test', '/test', player => {
+    player.pos = { x: 1719.3363037109375, y: 3269.841796875, z: 40.93994140625 };
+});
