@@ -20,7 +20,11 @@ alt.setInterval(() => {
             }
 
             const name = player.getSyncedMeta('player');
-            alt.emit('chat:SendAll', `${name} was kicked for not sending a heartbeat to the server.`);
+            if (!name) {
+                return;
+            }
+
+            alt.emit('chat:SendAll', `(${player.id}) was kicked for not sending a heartbeat to the server.`);
             player.kick();
         }, 1900);
 
@@ -35,14 +39,13 @@ function handleSpeedCheck(player, eventHash, currentSpeed) {
         return;
     }
 
-    const name = player.getSyncedMeta('player');
     if (currentSpeed === undefined || currentSpeed === null) {
         if (player.vehicle && player.vehicle.valid) {
             player.vehicle.destroy();
         }
 
         alt.clearTimeout(player.isCheatChecking);
-        alt.emit('chat:SendAll', `${name} sent up invalid speed values.`);
+        alt.emit('chat:SendAll', `(${player.id}) sent up invalid speed values.`);
         player.kick();
         return;
     }
@@ -53,7 +56,7 @@ function handleSpeedCheck(player, eventHash, currentSpeed) {
         }
 
         alt.clearTimeout(player.isCheatChecking);
-        alt.emit('chat:SendAll', `${name} was kicked for leaving their vehicle.`);
+        alt.emit('chat:SendAll', `(${player.id}) was kicked for leaving their vehicle.`);
         player.kick();
         return;
     }
@@ -64,7 +67,7 @@ function handleSpeedCheck(player, eventHash, currentSpeed) {
         }
 
         alt.clearTimeout(player.isCheatChecking);
-        alt.emit('chat:SendAll', `${name} was kicked for speed hacking.`);
+        alt.emit('chat:SendAll', `(${player.id}) was kicked for speed hacking.`);
         player.kick();
         return;
     }
@@ -84,7 +87,7 @@ function handleSpeedCheck(player, eventHash, currentSpeed) {
         }
 
         alt.clearTimeout(player.isCheatChecking);
-        alt.emit('chat:SendAll', `${name} was kicked for teleporting.`);
+        alt.emit('chat:SendAll', `(${player.id}) was kicked for teleporting.`);
         player.kick();
         return;
     }
@@ -95,7 +98,7 @@ function handleSpeedCheck(player, eventHash, currentSpeed) {
         }
 
         alt.clearTimeout(player.isCheatChecking);
-        alt.emit('chat:SendAll', `${name} was kicked for super jump.`);
+        alt.emit('chat:SendAll', `(${player.id}) was kicked for super jump.`);
         player.kick();
         return;
     }
