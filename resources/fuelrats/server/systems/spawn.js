@@ -3,7 +3,11 @@ import { DEFAULT_CONFIG } from '../configuration/config';
 
 alt.on('sync:Player', spawnPlayer);
 
-const spawn = { x: 1068.10546875, y: 3049.371337890625, z: 41.2769775390625 };
+const spawn = {
+    x: 68.5054931640625,
+    y: -675.4417724609375,
+    z: 44.0908203125,
+};
 
 export function spawnPlayer(player) {
     player.model = 'mp_m_freemode_01';

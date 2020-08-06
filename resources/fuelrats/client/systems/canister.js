@@ -10,9 +10,9 @@ const emptyVector = { x: 0, y: 0, z: 0 };
 const canisters = [];
 const jerryCanHash = native.getHashKey('prop_jerrycan_01a');
 const spawn = {
-    x: 1207.3187255859375,
-    y: 3078.633056640625,
-    z: 40.6871337890625
+    x: 68.5054931640625,
+    y: -675.4417724609375,
+    z: 44.0908203125,
 };
 const spawnBlip = new alt.PointBlip(spawn.x, spawn.y, spawn.z);
 spawnBlip.sprite = 40;
@@ -23,7 +23,7 @@ spawnBlip.name = 'Spawn';
 native.requestModel(jerryCanHash);
 
 function canisterUpdate(canisterData) {
-    let i = canisters.findIndex(canister => canister.hash === canisterData.hash);
+    let i = canisters.findIndex((canister) => canister.hash === canisterData.hash);
 
     if (i <= -1) {
         canisters.push(canisterData);
