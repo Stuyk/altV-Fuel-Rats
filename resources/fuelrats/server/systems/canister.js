@@ -9,7 +9,7 @@ export class Canister {
             pos,
             player: null,
             hash: generateHash(`${Math.random() * 50}`),
-            goal: DEFAULT_CONFIG.SCRUM_GOALS[Math.floor(Math.random() * DEFAULT_CONFIG.SCRUM_GOALS.length)]
+            goal: DEFAULT_CONFIG.SCRUM_GOALS[Math.floor(Math.random() * DEFAULT_CONFIG.SCRUM_GOALS.length)],
         };
 
         this.pickupCooldown = Date.now() + 2500;
@@ -34,7 +34,7 @@ export class Canister {
             position = DEFAULT_CONFIG.SCRUM_SPAWNS[Math.floor(Math.random() * DEFAULT_CONFIG.SCRUM_SPAWNS.length)];
         }
 
-        alt.Player.all.forEach(player => {
+        alt.Player.all.forEach((player) => {
             player.setSyncedMeta('hasCanister', false);
         });
 
@@ -52,7 +52,7 @@ export class Canister {
             this.updatePlayer(null);
             this.notifyPlayer(null, `The canister has been spawned.`);
             this.playSound(null, 'HUD_AWARDS', 'CHALLENGE_UNLOCKED');
-        }, 30000);
+        }, 45000);
     }
 
     pickup(player) {
@@ -148,7 +148,7 @@ export class Canister {
             return;
         }
 
-        const players = alt.Player.all.filter(player => {
+        const players = alt.Player.all.filter((player) => {
             if (player && player.valid && player.data && player.pos && player.dimension === 0 && player.vehicle) {
                 return player;
             }
