@@ -12,15 +12,17 @@ import {
 alt.onServer('login', toggleTick);
 alt.onServer('player:RemoveBlip', removeBlip);
 
-const playerBlips = [];
+const spawn = {
+    x: 68.5054931640625,
+    y: -675.4417724609375,
+    z: 44.0908203125
+};
 const disabledControls = [37, 24, 25, 65, 66, 67, 68, 69, 70, 75, 91, 92, 58];
 let nextHideAllPlayers = Date.now() + 25;
 let nextProfileCheck = Date.now() + 2500;
-let nextRaycast = Date.now() + 100;
-let nextPlayerBlipCheck = Date.now() + 2000;
-let endVector;
 let fwdVector;
 let lastRay;
+let endVector;
 
 function toggleTick() {
     alt.Player.local.isUsingMetric = native.getProfileSetting(227);
@@ -36,16 +38,12 @@ function tick() {
     disableControls();
     modifySpeed();
     drawNames();
+    preventCollision();
 
     // Timed
     hideAllPlayers();
     profileCheck();
     collisionCheck();
-
-    if (endVector) {
-        //const pos = { ...alt.Player.local.vehicle.pos };
-        //native.drawLine(pos.x, pos.y, pos.z, endVector.x, endVector.y, endVector.z, 255, 0, 0, 255);
-    }
 }
 
 function disableControls() {
@@ -147,15 +145,47 @@ function drawNames() {
     });
 }
 
-function collisionCheck() {
-    /*
-    if (Date.now() < nextRaycast) {
+function preventCollision() {
+    const ready = alt.Player.local.getSyncedMeta('ready');
+    const validVehicles = [...alt.Vehicle.all];
+
+    if (!ready) {
+        validVehicles.forEach(vehicle => {
+            native.freezeEntityPosition(vehicle.scriptID, true);
+
+            if (alt.Player.local.vehicle && alt.Player.local.vehicle === vehicle) {
+                native.setEntityVelocity(alt.Player.local.vehicle.scriptID, 0, 0, 0);
+                return;
+            }
+
+            native.setEntityCollision(vehicle.scriptID, false, true);
+        });
         return;
     }
 
-    nextRaycast = Date.now() + 10;
-    */
+    if (distance2d(alt.Player.local.pos, spawn) <= 5) {
+        validVehicles.forEach(vehicle => {
+            native.freezeEntityPosition(vehicle.scriptID, false);
 
+            if (alt.Player.local.vehicle && alt.Player.local.vehicle === vehicle) {
+                native.setEntityAlpha(alt.Player.local.scriptID, 255, false);
+                return;
+            }
+
+            native.setEntityAlpha(vehicle.scriptID, 150, false);
+            native.setEntityCollision(vehicle.scriptID, false, true);
+        });
+        return;
+    }
+
+    validVehicles.forEach(vehicle => {
+        native.setEntityAlpha(vehicle.scriptID, 255, false);
+        native.freezeEntityPosition(vehicle.scriptID, false);
+        native.setEntityCollision(vehicle.scriptID, true, true);
+    });
+}
+
+function collisionCheck() {
     if (!alt.Player.local.vehicle.dimensions) {
         return;
     }

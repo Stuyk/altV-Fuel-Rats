@@ -9,7 +9,7 @@ export class Canister {
             pos,
             player: null,
             hash: generateHash(`${Math.random() * 50}`),
-            goal: DEFAULT_CONFIG.SCRUM_GOALS[Math.floor(Math.random() * DEFAULT_CONFIG.SCRUM_GOALS.length)],
+            goal: DEFAULT_CONFIG.SCRUM_GOALS[Math.floor(Math.random() * DEFAULT_CONFIG.SCRUM_GOALS.length)]
         };
 
         this.pickupCooldown = Date.now() + 2500;
@@ -34,7 +34,7 @@ export class Canister {
             position = DEFAULT_CONFIG.SCRUM_SPAWNS[Math.floor(Math.random() * DEFAULT_CONFIG.SCRUM_SPAWNS.length)];
         }
 
-        alt.Player.all.forEach((player) => {
+        alt.Player.all.forEach(player => {
             player.setSyncedMeta('hasCanister', false);
         });
 
@@ -44,6 +44,24 @@ export class Canister {
         this.updatePlayer(null);
         this.notifyPlayer(null, `Next canister will spawn in 30 seconds!`);
 
+        alt.Player.all.forEach(player => {
+            if (!player || !player.valid || !player.vehicle) {
+                return;
+            }
+
+            player.setSyncedMeta('ready', false);
+            alt.setTimeout(() => {
+                if (player.isCheatChecking !== undefined) {
+                    alt.clearTimeout(player.isCheatChecking);
+                }
+
+                player.lastPosition = null;
+                player.lastZPos = null;
+                player.vehicle.pos = DEFAULT_CONFIG.SPAWN;
+                player.setSyncedMeta('ready', true);
+            }, 1000);
+        });
+
         alt.setTimeout(() => {
             this.data.goal = DEFAULT_CONFIG.SCRUM_GOALS[Math.floor(Math.random() * DEFAULT_CONFIG.SCRUM_GOALS.length)];
             this.data.player = null;
@@ -52,7 +70,7 @@ export class Canister {
             this.updatePlayer(null);
             this.notifyPlayer(null, `The canister has been spawned.`);
             this.playSound(null, 'HUD_AWARDS', 'CHALLENGE_UNLOCKED');
-        }, 45000);
+        }, 5000);
     }
 
     pickup(player) {
@@ -128,6 +146,13 @@ export class Canister {
         }
 
         if (this.data.player && this.data.player.valid) {
+            if (distance2d(this.data.player.pos, DEFAULT_CONFIG.SPAWN) <= 5 && !this.resetting) {
+                const message = `The canister has been reset.`;
+                this.notifyPlayer(null, message);
+                this.reset(null, true);
+                return;
+            }
+
             if (distance2d(this.data.player.pos, this.data.goal) <= 5 && !this.resetting) {
                 if (!this.data.player.score) {
                     this.data.player.score = 1;
@@ -148,7 +173,7 @@ export class Canister {
             return;
         }
 
-        const players = alt.Player.all.filter((player) => {
+        const players = alt.Player.all.filter(player => {
             if (player && player.valid && player.data && player.pos && player.dimension === 0 && player.vehicle) {
                 return player;
             }

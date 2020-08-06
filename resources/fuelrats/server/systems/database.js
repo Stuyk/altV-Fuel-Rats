@@ -44,30 +44,26 @@ export default class ConnectionInfo {
     }
 
     async initConnection() {
-        await new Promise(resolve => {
-            const interval = alt.setInterval(async () => {
-                const result = await this.client.connect().catch(err => {
-                    if (err) {
-                        return undefined;
-                    }
-                });
+        try {
+            this.instance = await this.client.connect();
+        } catch (err) {
+            this.initConnection();
+            return;
+        }
 
-                if (!result) {
-                    return;
-                }
+        try {
+            this.db = this.instance.db('fuelrats');
+        } catch (err) {}
 
-                resolve();
-                alt.clearInterval(interval);
-            }, 2000);
-        });
-
-        this.db = this.client.db('fuelrats');
         this.generateCollections();
         instance = this;
     }
 
     async generateCollections() {
-        await this.db.createCollection('accounts');
+        if (!this.db.collection('accounts')) {
+            await this.db.createCollection('accounts');
+        }
+
         alt.emit('database:Ready');
     }
 

@@ -39,12 +39,19 @@ function swapCar(player) {
         return;
     }
 
+    player.setSyncedMeta('ready', false);
+    if (player.isCheatChecking !== undefined) {
+        alt.clearTimeout(player.isCheatChecking);
+    }
+
+    player.lastPosition = null;
+    player.lastZPos = null;
+
     if (player.lastVehicle && player.lastVehicle.valid) {
         player.lastVehicle.destroy();
         player.lastVehicle = null;
     }
 
-    player.setSyncedMeta('ready', false);
     spawnPlayer(player);
 }
 

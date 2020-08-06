@@ -44,8 +44,12 @@ export function trySpawningVehicle(player, model) {
     }
 
     alt.setTimeout(() => {
+        if (!player || !player.valid) {
+            return;
+        }
+
         player.setSyncedMeta('ready', true);
-    }, 5000);
+    }, 1000);
 }
 
 function collideVehicle(player, vehicle) {

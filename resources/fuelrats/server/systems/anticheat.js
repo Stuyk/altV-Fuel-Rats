@@ -1,6 +1,106 @@
 import * as alt from 'alt';
+import { generateHash } from '../utility/encryption';
+import { distance2d } from '../../shared/vector';
 
-alt.onClient('anticheat:Teleport', player => {
-    alt.emit('chat:SendAll', `{FF0000}${player.name} was kicked for moving too fast.`);
-    player.kick();
-});
+const maxTeleportDistance = 100;
+
+alt.setInterval(() => {
+    const players = [...alt.Player.all];
+    for (let i = 0; i < players.length; i++) {
+        const player = players[i];
+        if (!player || !player.valid || !player.getSyncedMeta('ready')) {
+            continue;
+        }
+
+        const eventHash = generateHash(player.name);
+        alt.onClient(eventHash, handleSpeedCheck);
+        player.isCheatChecking = alt.setTimeout(() => {
+            if (!player || !player.valid) {
+                return;
+            }
+
+            const name = player.getSyncedMeta('player');
+            alt.emit('chat:SendAll', `${name} was kicked for not sending a heartbeat to the server.`);
+            player.kick();
+        }, 1900);
+
+        alt.emitClient(player, 'anticheat:Heartbeat', eventHash);
+    }
+}, 2000);
+
+function handleSpeedCheck(player, eventHash, currentSpeed) {
+    alt.offClient(eventHash, handleSpeedCheck);
+
+    if (!player || !player.valid || !player.getSyncedMeta('ready')) {
+        return;
+    }
+
+    const name = player.getSyncedMeta('player');
+    if (currentSpeed === undefined || currentSpeed === null) {
+        if (player.vehicle && player.vehicle.valid) {
+            player.vehicle.destroy();
+        }
+
+        alt.clearTimeout(player.isCheatChecking);
+        alt.emit('chat:SendAll', `${name} sent up invalid speed values.`);
+        player.kick();
+        return;
+    }
+
+    if (!player.vehicle) {
+        if (player.vehicle && player.vehicle.valid) {
+            player.vehicle.destroy();
+        }
+
+        alt.clearTimeout(player.isCheatChecking);
+        alt.emit('chat:SendAll', `${name} was kicked for leaving their vehicle.`);
+        player.kick();
+        return;
+    }
+
+    if (currentSpeed > 50) {
+        if (player.vehicle && player.vehicle.valid) {
+            player.vehicle.destroy();
+        }
+
+        alt.clearTimeout(player.isCheatChecking);
+        alt.emit('chat:SendAll', `${name} was kicked for speed hacking.`);
+        player.kick();
+        return;
+    }
+
+    if (!player.lastPosition) {
+        player.lastPosition = { ...player.pos };
+    }
+
+    if (!player.lastZPos) {
+        player.lastZPos = player.pos.z;
+    }
+
+    const dist = distance2d(player.pos, player.lastPosition);
+    if (dist >= maxTeleportDistance) {
+        if (player.vehicle && player.vehicle.valid) {
+            player.vehicle.destroy();
+        }
+
+        alt.clearTimeout(player.isCheatChecking);
+        alt.emit('chat:SendAll', `${name} was kicked for teleporting.`);
+        player.kick();
+        return;
+    }
+
+    if (player.pos.z - player.lastZPos > 45) {
+        if (player.vehicle && player.vehicle.valid) {
+            player.vehicle.destroy();
+        }
+
+        alt.clearTimeout(player.isCheatChecking);
+        alt.emit('chat:SendAll', `${name} was kicked for super jump.`);
+        player.kick();
+        return;
+    }
+
+    alt.clearTimeout(player.isCheatChecking);
+    player.lastPosition = { ...player.pos };
+    player.lastZPos = player.pos.z;
+}
