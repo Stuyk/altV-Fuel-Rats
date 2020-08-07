@@ -24,6 +24,12 @@ function selectVehicle(player, model) {
 }
 
 export function trySpawningVehicle(player, model) {
+    player.setSyncedMeta('pause', true);
+
+    if (player.vehicle && player.vehicle.valid) {
+        player.vehicle.destroy();
+    }
+
     try {
         const vehicle = new alt.Vehicle(model, player.pos.x, player.pos.y, player.pos.z, 0, 0, 0);
         player.setIntoVehicle(vehicle);
@@ -48,8 +54,8 @@ export function trySpawningVehicle(player, model) {
             return;
         }
 
-        player.setSyncedMeta('ready', true);
-    }, 1000);
+        player.setSyncedMeta('pause', false);
+    }, 2500);
 }
 
 function collideVehicle(player, vehicle) {

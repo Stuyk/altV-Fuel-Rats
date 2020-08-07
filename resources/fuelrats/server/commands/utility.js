@@ -3,6 +3,9 @@ import { registerCmd } from '../systems/chat';
 import { trySpawningVehicle } from '../systems/vehicles';
 import { spawnPlayer } from '../systems/spawn';
 
+const lastVotes = {};
+
+registerCmd('votekick', '/votekick [id]', handleKick);
 registerCmd('coords', '/coords | Returns current coordinates to chat and console.', player => {
     const coords = player.pos;
     player.send(JSON.stringify(coords));
@@ -39,7 +42,7 @@ function swapCar(player) {
         return;
     }
 
-    player.setSyncedMeta('ready', false);
+    player.ready = false;
     if (player.isCheatChecking !== undefined) {
         alt.clearTimeout(player.isCheatChecking);
     }
@@ -58,3 +61,64 @@ function swapCar(player) {
 registerCmd('test', '/test', player => {
     player.pos = { x: 1719.3363037109375, y: 3269.841796875, z: 40.93994140625 };
 });
+
+function handleKick(player, args) {
+    if (lastVotes[player.ip] && Date.now() < lastVotes[player.ip]) {
+        player.send(`You cannot call a vote that early.`);
+        return;
+    }
+
+    const id = args[0];
+    if (isNaN(id)) {
+        player.send(`/votekick [id]`);
+        return;
+    }
+
+    if (alt.Player.all.length <= 4) {
+        player.send(`/votekick is not enabled at this time.`);
+        return;
+    }
+
+    const target = alt.Player.all.find(p => p.id === parseInt(id));
+    if (!target) {
+        player.send(`That ID does not exist.`);
+        return;
+    }
+
+    if (target === player) {
+        player.send(`You can't kick yourself.`);
+        return;
+    }
+
+    if (!player.votedFor) {
+        player.votedFor = [target.ip];
+    } else {
+        if (player.votedFor.includes(target.ip)) {
+            player.send(`Stop trying to vote twice asshole.`);
+            return;
+        }
+
+        player.votedFor.push(target.ip);
+    }
+
+    if (!target.votes) {
+        target.votes = 1;
+        lastVotes[player.ip] = Date.now() + 60000 * 5;
+    } else {
+        target.votes += 1;
+    }
+
+    const name = target.getSyncedMeta('name');
+    player.send(`You voted to kick ${name} (${target.id})`);
+
+    if (target.votes && target.votes / alt.Player.all.length >= 0.5) {
+        if (target.vehicle && target.vehicle.destroy) {
+            target.vehicle.destroy();
+        }
+
+        alt.emit('chat:SendAll', `(${target.id}) was kicked from the server.`);
+        alt.emit('kicked:AddIP', target.ip);
+        target.kick();
+        return;
+    }
+}

@@ -109,7 +109,6 @@ function synchronizeVehicle() {
 
     alt.setTimeout(() => {
         native.setPedIntoVehicle(alt.Player.local.scriptID, vehicle, -1);
-        native.setEntityAlpha(alt.Player.local.scriptID);
     }, 50);
 }
 

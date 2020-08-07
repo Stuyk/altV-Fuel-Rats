@@ -2,19 +2,34 @@ import * as alt from 'alt';
 import { generateHash } from '../utility/encryption';
 import { distance2d } from '../../shared/vector';
 
-const maxTeleportDistance = 100;
+const maxTeleportDistance = 96;
+let paused = false;
+
+alt.on('anticheat:Pause', handlePause);
+
+function handlePause(value) {
+    paused = value;
+}
 
 alt.setInterval(() => {
+    if (paused) {
+        return;
+    }
+
     const players = [...alt.Player.all];
     for (let i = 0; i < players.length; i++) {
         const player = players[i];
-        if (!player || !player.valid || !player.getSyncedMeta('ready')) {
+        if (!player || !player.valid || player.getSyncedMeta('pause')) {
             continue;
         }
 
         const eventHash = generateHash(player.name);
         alt.onClient(eventHash, handleSpeedCheck);
         player.isCheatChecking = alt.setTimeout(() => {
+            if (paused) {
+                return;
+            }
+
             if (!player || !player.valid) {
                 return;
             }
@@ -35,7 +50,13 @@ alt.setInterval(() => {
 function handleSpeedCheck(player, eventHash, currentSpeed) {
     alt.offClient(eventHash, handleSpeedCheck);
 
-    if (!player || !player.valid || !player.getSyncedMeta('ready')) {
+    if (!player || !player.valid || player.getSyncedMeta('pause')) {
+        try {
+            alt.clearTimeout(player.isCheatChecking);
+            player.isCheatChecking = null;
+        } catch (err) {
+            player.isCheatChecking = null;
+        }
         return;
     }
 
@@ -50,12 +71,35 @@ function handleSpeedCheck(player, eventHash, currentSpeed) {
         return;
     }
 
+    if (player.offenses >= 3) {
+        if (player.vehicle && player.vehicle.valid) {
+            player.vehicle.destroy();
+        }
+
+        try {
+            alt.clearTimeout(player.isCheatChecking);
+            player.isCheatChecking = null;
+        } catch (err) {
+            player.isCheatChecking = null;
+        }
+
+        alt.emit('chat:SendAll', `(${player.id}) was kicked for resetting the canister too many times.`);
+        player.kick();
+        return;
+    }
+
     if (!player.vehicle) {
         if (player.vehicle && player.vehicle.valid) {
             player.vehicle.destroy();
         }
 
-        alt.clearTimeout(player.isCheatChecking);
+        try {
+            alt.clearTimeout(player.isCheatChecking);
+            player.isCheatChecking = null;
+        } catch (err) {
+            player.isCheatChecking = null;
+        }
+
         alt.emit('chat:SendAll', `(${player.id}) was kicked for leaving their vehicle.`);
         player.kick();
         return;
@@ -66,7 +110,13 @@ function handleSpeedCheck(player, eventHash, currentSpeed) {
             player.vehicle.destroy();
         }
 
-        alt.clearTimeout(player.isCheatChecking);
+        try {
+            alt.clearTimeout(player.isCheatChecking);
+            player.isCheatChecking = null;
+        } catch (err) {
+            player.isCheatChecking = null;
+        }
+
         alt.emit('chat:SendAll', `(${player.id}) was kicked for speed hacking.`);
         player.kick();
         return;
@@ -86,7 +136,13 @@ function handleSpeedCheck(player, eventHash, currentSpeed) {
             player.vehicle.destroy();
         }
 
-        alt.clearTimeout(player.isCheatChecking);
+        try {
+            alt.clearTimeout(player.isCheatChecking);
+            player.isCheatChecking = null;
+        } catch (err) {
+            player.isCheatChecking = null;
+        }
+
         alt.emit('chat:SendAll', `(${player.id}) was kicked for teleporting.`);
         player.kick();
         return;
@@ -97,13 +153,25 @@ function handleSpeedCheck(player, eventHash, currentSpeed) {
             player.vehicle.destroy();
         }
 
-        alt.clearTimeout(player.isCheatChecking);
+        try {
+            alt.clearTimeout(player.isCheatChecking);
+            player.isCheatChecking = null;
+        } catch (err) {
+            player.isCheatChecking = null;
+        }
+
         alt.emit('chat:SendAll', `(${player.id}) was kicked for super jump.`);
         player.kick();
         return;
     }
 
-    alt.clearTimeout(player.isCheatChecking);
+    try {
+        alt.clearTimeout(player.isCheatChecking);
+        player.isCheatChecking = null;
+    } catch (err) {
+        player.isCheatChecking = null;
+    }
+
     player.lastPosition = { ...player.pos };
     player.lastZPos = player.pos.z;
 }

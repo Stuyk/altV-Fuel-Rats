@@ -1,13 +1,7 @@
 import * as alt from 'alt';
 import * as native from 'natives';
 import { drawText2d, drawText3d } from '../utility/textdraws';
-import {
-    getClosestVectorFromGroup,
-    distance,
-    getClosestVehicle,
-    distance2d,
-    getForwardVectorServer
-} from '../../shared/vector';
+import { distance2d } from '../../shared/vector';
 
 alt.onServer('login', toggleTick);
 alt.onServer('player:RemoveBlip', removeBlip);
@@ -22,7 +16,6 @@ let nextHideAllPlayers = Date.now() + 25;
 let nextProfileCheck = Date.now() + 2500;
 let fwdVector;
 let lastRay;
-let endVector;
 
 function toggleTick() {
     alt.Player.local.isUsingMetric = native.getProfileSetting(227);
@@ -62,7 +55,6 @@ function hideAllPlayers() {
     for (let i = 0; i < players.length; i++) {
         const player = players[i];
         native.setEntityInvincible(player.scriptID, true);
-        native.setEntityAlpha(player.scriptID, 0);
     }
 }
 
@@ -146,43 +138,41 @@ function drawNames() {
 }
 
 function preventCollision() {
-    const ready = alt.Player.local.getSyncedMeta('ready');
     const validVehicles = [...alt.Vehicle.all];
+    const paused = alt.Player.local.getSyncedMeta('pause');
+    const spawnDistance = distance2d(alt.Player.local.pos, spawn);
 
-    if (!ready) {
-        validVehicles.forEach(vehicle => {
-            native.freezeEntityPosition(vehicle.scriptID, true);
-
-            if (alt.Player.local.vehicle && alt.Player.local.vehicle === vehicle) {
-                native.setEntityVelocity(alt.Player.local.vehicle.scriptID, 0, 0, 0);
-                return;
+    if (spawnDistance <= 10) {
+        for (let i = 0; i < validVehicles.length; i++) {
+            const vehicle = validVehicles[i];
+            if (vehicle === alt.Player.local.vehicle) {
+                continue;
             }
 
             native.setEntityCollision(vehicle.scriptID, false, true);
-        });
-        return;
-    }
-
-    if (distance2d(alt.Player.local.pos, spawn) <= 5) {
-        validVehicles.forEach(vehicle => {
-            native.freezeEntityPosition(vehicle.scriptID, false);
-
-            if (alt.Player.local.vehicle && alt.Player.local.vehicle === vehicle) {
-                native.setEntityAlpha(alt.Player.local.scriptID, 255, false);
-                return;
+            native.setEntityNoCollisionEntity(alt.Player.local.vehicle.scriptID, vehicle.scriptID, true);
+        }
+    } else {
+        for (let i = 0; i < validVehicles.length; i++) {
+            const vehicle = validVehicles[i];
+            if (vehicle === alt.Player.local.vehicle) {
+                continue;
             }
 
-            native.setEntityAlpha(vehicle.scriptID, 150, false);
-            native.setEntityCollision(vehicle.scriptID, false, true);
-        });
+            native.setEntityCollision(vehicle.scriptID, true, true);
+        }
+    }
+
+    if (paused) {
+        if (!native.isScreenFadingOut() && !native.isScreenFadedOut()) {
+            native.doScreenFadeOut(500);
+        }
         return;
     }
 
-    validVehicles.forEach(vehicle => {
-        native.setEntityAlpha(vehicle.scriptID, 255, false);
-        native.freezeEntityPosition(vehicle.scriptID, false);
-        native.setEntityCollision(vehicle.scriptID, true, true);
-    });
+    if (!native.isScreenFadedIn() && !native.isScreenFadingIn()) {
+        native.doScreenFadeIn(500);
+    }
 }
 
 function collisionCheck() {
@@ -219,7 +209,6 @@ function collisionCheck() {
     );
 
     let [_a, _hit, _endCoords, _surfaceNormal, _entity] = native.getShapeTestResult(lastRay);
-    endVector = endVec;
 
     if (!_hit) {
         return;

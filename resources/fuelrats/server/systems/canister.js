@@ -2,6 +2,7 @@ import * as alt from 'alt';
 import { generateHash } from '../utility/encryption';
 import { DEFAULT_CONFIG } from '../configuration/config';
 import { distance2d } from '../../shared/vector';
+import { trySpawningVehicle } from './vehicles';
 
 export class Canister {
     constructor(pos) {
@@ -12,6 +13,7 @@ export class Canister {
             goal: DEFAULT_CONFIG.SCRUM_GOALS[Math.floor(Math.random() * DEFAULT_CONFIG.SCRUM_GOALS.length)]
         };
 
+        this.canisterAtSpawnTicks = 0;
         this.pickupCooldown = Date.now() + 2500;
         alt.on('sync:Player', this.updatePlayer.bind(this));
         alt.setInterval(this.tick.bind(this), 10);
@@ -38,29 +40,30 @@ export class Canister {
             player.setSyncedMeta('hasCanister', false);
         });
 
+        this.canisterAtSpawnTicks = 0;
         this.data.player = null;
         this.data.pos = null;
         this.data.goal = null;
         this.updatePlayer(null);
-        this.notifyPlayer(null, `Next canister will spawn in 30 seconds!`);
 
-        alt.Player.all.forEach(player => {
+        alt.emit('anticheat:Pause', true);
+        const players = [...alt.Player.all];
+        for (let i = 0; i < players.length; i++) {
+            const player = players[i];
             if (!player || !player.valid || !player.vehicle) {
-                return;
+                continue;
             }
 
-            player.setSyncedMeta('ready', false);
-            alt.setTimeout(() => {
-                if (player.isCheatChecking !== undefined) {
-                    alt.clearTimeout(player.isCheatChecking);
-                }
+            if (!player.vehicle.destroy || !player.vehicle.valid) {
+                continue;
+            }
 
-                player.lastPosition = null;
-                player.lastZPos = null;
-                player.vehicle.pos = DEFAULT_CONFIG.SPAWN;
-                player.setSyncedMeta('ready', true);
-            }, 1000);
-        });
+            player.vehicle.destroy();
+            player.lastPosition = null;
+            player.lastZPos = null;
+            player.pos = DEFAULT_CONFIG.SPAWN;
+            trySpawningVehicle(player, player.vehicleModel);
+        }
 
         alt.setTimeout(() => {
             this.data.goal = DEFAULT_CONFIG.SCRUM_GOALS[Math.floor(Math.random() * DEFAULT_CONFIG.SCRUM_GOALS.length)];
@@ -68,8 +71,9 @@ export class Canister {
             this.data.pos = position;
             this.resetting = false;
             this.updatePlayer(null);
-            this.notifyPlayer(null, `The canister has been spawned.`);
+            this.notifyPlayer(null, `Canister was spawned!`);
             this.playSound(null, 'HUD_AWARDS', 'CHALLENGE_UNLOCKED');
+            alt.emit('anticheat:Pause', false);
         }, 5000);
     }
 
@@ -95,12 +99,16 @@ export class Canister {
             );
             this.data.player.canister = null;
             this.data.player.setSyncedMeta('hasCanister', false);
+            this.data.player.vehicle.customPrimaryColor = { r: 255, g: 255, b: 255, a: 255 };
+            this.data.player.vehicle.customSecondaryColor = { r: 255, g: 255, b: 255, a: 255 };
         } else {
             this.notifyPlayer(null, `${player.data.username} has picked up a canister.`);
         }
 
         player.canister = this;
         this.data.player = player;
+        this.data.player.vehicle.customPrimaryColor = { r: 190, g: 110, b: 255, a: 255 };
+        this.data.player.vehicle.customSecondaryColor = { r: 190, g: 110, b: 255, a: 255 };
 
         player.setSyncedMeta('hasCanister', true);
         this.updatePlayer(null);
@@ -146,8 +154,25 @@ export class Canister {
         }
 
         if (this.data.player && this.data.player.valid) {
-            if (distance2d(this.data.player.pos, DEFAULT_CONFIG.SPAWN) <= 5 && !this.resetting) {
-                const message = `The canister has been reset.`;
+            const canisterDistFromSpawn = distance2d(this.data.player.pos, DEFAULT_CONFIG.SPAWN);
+            if (canisterDistFromSpawn <= 15) {
+                this.canisterAtSpawnTicks += 1;
+            } else {
+                this.canisterAtSpawnTicks = 0;
+            }
+
+            if (this.canisterAtSpawnTicks >= 50 && !this.resetting) {
+                this.canisterAtSpawnTicks = 0;
+
+                if (this.data.player.offenses === undefined) {
+                    this.data.player.offenses = 1;
+                } else {
+                    this.data.player.offenses += 1;
+                }
+
+                this.data.player.send(`You were given an offense: ${this.data.player.offenses} (Reset Canister)`);
+
+                const message = `The canister was reset due to being too close to spawn.`;
                 this.notifyPlayer(null, message);
                 this.reset(null, true);
                 return;

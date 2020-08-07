@@ -44,6 +44,15 @@ function invokeCmd(player, commandName, args) {
 }
 
 function chatSend(player, msg) {
+    if (!player.lastMessage) {
+        player.lastMessage = Date.now() + 5000;
+    } else {
+        if (Date.now() < player.lastMessage) {
+            player.send(`{FF0000}You are sending messages too quickly. 5s per message.`);
+            return;
+        }
+    }
+
     if (msg[0] === '/') {
         alt.log(`[Command] ${player.name} ${msg}`);
         msg = msg.trim().slice(1);
