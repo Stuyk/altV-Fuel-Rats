@@ -161,6 +161,10 @@ export class Canister {
                 this.canisterAtSpawnTicks = 0;
             }
 
+            if (this.data.player.pos.z <= -1) {
+                this.canisterAtSpawnTicks = 51;
+            }
+
             if (this.canisterAtSpawnTicks >= 50 && !this.resetting) {
                 this.canisterAtSpawnTicks = 0;
 
